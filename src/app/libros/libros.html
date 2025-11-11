@@ -1,0 +1,57 @@
+<section style="padding:16px; max-width:900px; margin:auto">
+  <h2>📚 Libros</h2>
+
+  <!-- 🔎 Filtros -->
+  <div style="display:flex; gap:8px; margin:12px 0; align-items:center; flex-wrap:wrap">
+    <input [(ngModel)]="search" name="search" placeholder="🔎 Buscar por título o autor" />
+    <select [(ngModel)]="filterCategoriaId" name="filterCategoriaId">
+      <option value="">Todas las categorías</option>
+      <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+    </select>
+    <button type="button" (click)="search=''; filterCategoriaId='';">Limpiar filtros</button>
+  </div>
+
+  <!-- Formulario para crear -->
+  <form (ngSubmit)="crear()" style="display:grid; grid-template-columns: 1fr 1fr 120px 1fr 110px; gap:8px; align-items:center; margin:12px 0;">
+    <input [(ngModel)]="form.titulo" name="titulo" placeholder="Título" required />
+    <input [(ngModel)]="form.autor" name="autor" placeholder="Autor" />
+    <input [(ngModel)]="form.anio" name="anio" type="number" placeholder="Año" />
+    <select [(ngModel)]="form.categoriaId" name="categoriaId" required>
+      <option value="">-- Categoría --</option>
+      <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+    </select>
+    <button type="submit" [disabled]="!form.titulo || !form.categoriaId">Agregar</button>
+  </form>
+
+  <!-- Lista / edición -->
+  <table border="1" cellpadding="6" style="border-collapse:collapse; width:100%">
+    <thead>
+      <tr>
+        <th>Título</th><th>Autor</th><th>Año</th><th>Categoría</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ⬇️ Usa la lista filtrada y trackBy -->
+      <tr *ngFor="let l of librosFiltrados; trackBy: trackById">
+        <td><input [(ngModel)]="l.titulo" name="t{{l.id}}" /></td>
+        <td><input [(ngModel)]="l.autor" name="a{{l.id}}" /></td>
+        <td><input [(ngModel)]="l.anio" name="n{{l.id}}" type="number" /></td>
+        <td>
+          <select [(ngModel)]="l.categoriaId" name="c{{l.id}}">
+            <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+          </select>
+        </td>
+        <td>
+          <button type="button" (click)="guardar(l)">Guardar</button>
+          <button type="button" (click)="borrar(l.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <p *ngIf="libros.length > 0 && librosFiltrados.length === 0" style="opacity:.7; margin-top:8px">
+    No hay resultados que coincidan con el filtro.
+  </p>
+</section>
+
