@@ -1,6 +1,14 @@
 <section style="padding:16px; max-width:900px; margin:auto">
   <h2>📚 Libros</h2>
 
+  <!-- Mensajes globales -->
+  <div *ngIf="mensajeOk" style="margin:8px 0; padding:8px; border-radius:4px; background:#d1fae5;">
+    {{ mensajeOk }}
+  </div>
+  <div *ngIf="mensajeError" style="margin:8px 0; padding:8px; border-radius:4px; background:#fee2e2;">
+    {{ mensajeError }}
+  </div>
+
   <!-- 🔎 Filtros -->
   <div style="display:flex; gap:8px; margin:12px 0; align-items:center; flex-wrap:wrap">
     <input [(ngModel)]="search" name="search" placeholder="🔎 Buscar por título o autor" />
@@ -11,47 +19,100 @@
     <button type="button" (click)="search=''; filterCategoriaId='';">Limpiar filtros</button>
   </div>
 
-  <!-- Formulario para crear -->
-  <form (ngSubmit)="crear()" style="display:grid; grid-template-columns: 1fr 1fr 120px 1fr 110px; gap:8px; align-items:center; margin:12px 0;">
-    <input [(ngModel)]="form.titulo" name="titulo" placeholder="Título" required />
-    <input [(ngModel)]="form.autor" name="autor" placeholder="Autor" />
-    <input [(ngModel)]="form.anio" name="anio" type="number" placeholder="Año" />
-    <select [(ngModel)]="form.categoriaId" name="categoriaId" required>
-      <option value="">-- Categoría --</option>
-      <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
-    </select>
-    <button type="submit" [disabled]="!form.titulo || !form.categoriaId">Agregar</button>
+  <!-- ================= FORMULARIO REACTIVO ================= -->
+  <h3 style="margin-top:12px;">
+    {{ editando ? 'Editar libro' : 'Agregar libro' }}
+  </h3>
+
+  <form [formGroup]="formLibro"
+        (ngSubmit)="guardar()"
+        style="display:grid; grid-template-columns: 1fr 1fr 120px 1fr 130px; gap:8px; align-items:flex-start; margin:12px 0;">
+
+    <!-- id oculto -->
+    <input type="hidden" formControlName="id" />
+
+    <!-- TÍTULO -->
+    <div style="display:flex; flex-direction:column;">
+      <input formControlName="titulo" placeholder="Título" />
+      <small *ngIf="titulo?.invalid && (titulo?.touched || titulo?.dirty)" style="color:#dc2626;">
+        <span *ngIf="titulo?.errors?.['required']">El título es obligatorio.</span>
+        <span *ngIf="titulo?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+      </small>
+    </div>
+
+    <!-- AUTOR -->
+    <div style="display:flex; flex-direction:column;">
+      <input formControlName="autor" placeholder="Autor" />
+      <small *ngIf="autor?.invalid && (autor?.touched || autor?.dirty)" style="color:#dc2626;">
+        <span *ngIf="autor?.errors?.['required']">El autor es obligatorio.</span>
+        <span *ngIf="autor?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+      </small>
+    </div>
+
+    <!-- AÑO -->
+    <div style="display:flex; flex-direction:column;">
+      <input formControlName="anio" type="number" placeholder="Año" />
+      <small *ngIf="anio?.invalid && (anio?.touched || anio?.dirty)" style="color:#dc2626;">
+        <span *ngIf="anio?.errors?.['required']">El año es obligatorio.</span>
+        <span *ngIf="anio?.errors?.['min']">Año mínimo 1900.</span>
+        <span *ngIf="anio?.errors?.['max']">El año no puede ser mayor al actual.</span>
+      </small>
+    </div>
+
+    <!-- CATEGORÍA -->
+    <div style="display:flex; flex-direction:column;">
+      <select formControlName="categoriaId">
+        <option value="">-- Categoría --</option>
+        <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+      </select>
+      <small *ngIf="categoriaId?.invalid && (categoriaId?.touched || categoriaId?.dirty)" style="color:#dc2626;">
+        Selecciona una categoría.
+      </small>
+    </div>
+
+    <!-- BOTONES -->
+    <div style="display:flex; gap:4px; justify-content:flex-end;">
+      <button type="submit">
+        {{ editando ? 'Actualizar' : 'Agregar' }}
+      </button>
+      <button type="button" (click)="cancelarEdicion()">Limpiar</button>
+    </div>
   </form>
 
-  <!-- Lista / edición -->
+  <hr style="margin:16px 0;">
+
+  <!-- ================= LISTA ================= -->
   <table border="1" cellpadding="6" style="border-collapse:collapse; width:100%">
     <thead>
       <tr>
-        <th>Título</th><th>Autor</th><th>Año</th><th>Categoría</th><th>Acciones</th>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Año</th>
+        <th>Categoría</th>
+        <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <!-- ⬇️ Usa la lista filtrada y trackBy -->
       <tr *ngFor="let l of librosFiltrados; trackBy: trackById">
-        <td><input [(ngModel)]="l.titulo" name="t{{l.id}}" /></td>
-        <td><input [(ngModel)]="l.autor" name="a{{l.id}}" /></td>
-        <td><input [(ngModel)]="l.anio" name="n{{l.id}}" type="number" /></td>
-        <td>
-          <select [(ngModel)]="l.categoriaId" name="c{{l.id}}">
-            <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
-          </select>
+        <td>{{ l.titulo }}</td>
+        <td>{{ l.autor }}</td>
+        <td style="text-align:center">{{ l.anio }}</td>
+        <td style="text-align:center">
+          {{ getNombreCategoria(l.categoriaId) }}
         </td>
-        <td>
-          <button type="button" (click)="guardar(l)">Guardar</button>
-          <button type="button" (click)="borrar(l.id)">Eliminar</button>
+        <td style="text-align:center">{{ l.estado | estadoLibro }}</td>
+        <td style="white-space:nowrap; text-align:center">
+          <a [routerLink]="['/libros', l.id]">Ver detalle</a>
+          <button type="button" (click)="editar(l)" style="margin-left:4px;">Editar</button>
+          <button type="button" (click)="borrar(l.id)" style="margin-left:4px;">Eliminar</button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  
-  <p *ngIf="libros.length > 0 && librosFiltrados.length === 0" style="opacity:.7; margin-top:8px">
+  <p *ngIf="libros.length > 0 && librosFiltrados.length === 0"
+     style="opacity:.7; margin-top:8px">
     No hay resultados que coincidan con el filtro.
   </p>
 </section>
-

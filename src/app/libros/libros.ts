@@ -1,80 +1,171 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup
+} from '@angular/forms';
+import { RouterModule } from '@angular/router';            
 import { FirestoreService } from '../core/firestore';
 import { Categoria, Libro } from '../core/models';
+import { EstadoLibroPipe } from '../core/estado.pipe';
+
 
 @Component({
   selector: 'app-libros',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, EstadoLibroPipe ],  
   templateUrl: './libros.html',
 })
 export class LibrosComponent {
   categorias: Categoria[] = [];
   libros: Libro[] = [];
-  form: Partial<Libro> = { titulo: '', autor: '', anio: undefined, categoriaId: '' };
 
-  // 🔍 NUEVO: filtros
+  // filtros
   search = '';
   filterCategoriaId = '';
 
-  constructor(private fs: FirestoreService) {
-    // Cargar categorías para el selector
+  // formulario reactivo
+  formLibro!: FormGroup;
+
+  mensajeOk = '';
+  mensajeError = '';
+
+  constructor(
+    private fs: FirestoreService,
+    private fb: FormBuilder
+  ) {
+    // inicializar formulario
+    this.formLibro = this.fb.group({
+      id: [''], // para edición
+      titulo: ['', [Validators.required, Validators.minLength(3)]],
+      autor: ['', [Validators.required, Validators.minLength(3)]],
+      anio: [null, [
+        Validators.required,
+        Validators.min(1900),
+        Validators.max(new Date().getFullYear())
+      ]],
+      categoriaId: ['', Validators.required],
+    });
+
     this.fs.listarCategorias().subscribe(cs => this.categorias = cs);
-    // Cargar libros
     this.fs.listarLibros().subscribe(ls => this.libros = ls);
   }
 
-  // 🔎 NUEVO: lista filtrada
+  // Getters para el HTML
+  get titulo() { return this.formLibro.get('titulo'); }
+  get autor() { return this.formLibro.get('autor'); }
+  get anio() { return this.formLibro.get('anio'); }
+  get categoriaId() { return this.formLibro.get('categoriaId'); }
+  get editando() { return !!this.formLibro.get('id')?.value; }
+
+  // 🔎 lista filtrada + ordenada por título
   get librosFiltrados(): Libro[] {
     const s = this.search.trim().toLowerCase();
     const cat = this.filterCategoriaId;
 
-    return this.libros.filter(l => {
-      const coincideTexto =
-        !s ||
-        (l.titulo ?? '').toLowerCase().includes(s) ||
-        (l.autor ?? '').toLowerCase().includes(s);
+    return this.libros
+      .filter(l => {
+        const coincideTexto =
+          !s ||
+          (l.titulo ?? '').toLowerCase().includes(s) ||
+          (l.autor ?? '').toLowerCase().includes(s);
 
-      const coincideCategoria = !cat || (l.categoriaId === cat);
+        const coincideCategoria = !cat || (l.categoriaId === cat);
 
-      return coincideTexto && coincideCategoria;
+        return coincideTexto && coincideCategoria;
+      })
+      .sort((a, b) => (a.titulo ?? '').localeCompare(b.titulo ?? ''));
+  }
+
+  // helper para obtener nombre de categoría
+  getNombreCategoria(categoriaId?: string): string {
+    const cat = this.categorias.find(c => c.id === categoriaId);
+    return cat ? cat.nombre : '-';
+  }
+
+  // 🟢 Crear / Actualizar libro
+  async guardar() {
+    this.mensajeOk = '';
+    this.mensajeError = '';
+
+    if (this.formLibro.invalid) {
+      this.formLibro.markAllAsTouched();
+      return;
+    }
+
+    const { id, titulo, autor, anio, categoriaId } = this.formLibro.value;
+
+    try {
+      if (id) {
+        // actualizar
+        await this.fs.actualizarLibro(id, {
+          titulo: (titulo ?? '').trim(),
+          autor: autor ?? '',
+          anio: anio ?? undefined,
+          categoriaId: categoriaId ?? '',
+          updatedAt: Date.now(),
+        });
+        this.mensajeOk = 'Libro actualizado correctamente.';
+      } else {
+        // crear
+        await this.fs.crearLibro({
+          titulo: (titulo ?? '').trim(),
+          autor: autor ?? '',
+          anio: anio ?? undefined,
+          categoriaId: categoriaId ?? '',
+          estado: 'disponible',
+          creadoPorUid: 'anon',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        this.mensajeOk = 'Libro creado correctamente.';
+      }
+
+      this.formLibro.reset();
+    } catch (err) {
+      console.error(err);
+      this.mensajeError = 'Ocurrió un error al guardar el libro.';
+    }
+  }
+
+  // ✏️ Cargar datos para editar
+  editar(libro: Libro) {
+    this.mensajeOk = '';
+    this.mensajeError = '';
+
+    this.formLibro.reset({
+      id: libro.id ?? '',
+      titulo: libro.titulo ?? '',
+      autor: libro.autor ?? '',
+      anio: (libro.anio ?? null) as any,
+      categoriaId: libro.categoriaId ?? '',
     });
   }
 
-  async crear() {
-    const t = (this.form.titulo ?? '').trim();
-    if (!t || !this.form.categoriaId) return;
-    await this.fs.crearLibro({
-      titulo: t,
-      autor: this.form.autor ?? '',
-      anio: Number(this.form.anio) || undefined,
-      categoriaId: this.form.categoriaId!,
-      estado: 'disponible',
-      creadoPorUid: 'anon',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-    this.form = { titulo: '', autor: '', anio: undefined, categoriaId: '' };
+  cancelarEdicion() {
+    this.formLibro.reset();
   }
 
-  async guardar(l: Libro) {
-    if (!l.id) return;
-    await this.fs.actualizarLibro(l.id, {
-      titulo: l.titulo?.trim() ?? '',
-      autor: l.autor ?? '',
-      anio: l.anio ?? undefined,
-      categoriaId: l.categoriaId ?? '',
-      updatedAt: Date.now(),
-    });
-  }
-
+  // 🗑 Eliminar
   async borrar(id?: string) {
     if (!id) return;
-    await this.fs.eliminarLibro(id);
+    const ok = confirm('¿Seguro que quieres eliminar este libro?');
+    if (!ok) return;
+
+    this.mensajeOk = '';
+    this.mensajeError = '';
+
+    try {
+      await this.fs.eliminarLibro(id);
+      this.mensajeOk = 'Libro eliminado correctamente.';
+    } catch (err) {
+      console.error(err);
+      this.mensajeError = 'No se pudo eliminar el libro.';
+    }
   }
 
-  // 🔢 Optimización del *ngFor
   trackById = (_: number, l: Libro) => l.id!;
 }

@@ -1,0 +1,23 @@
+<section style="padding:16px; max-width:720px; margin:auto">
+
+  <h2>📊 Estadísticas de la Biblioteca</h2>
+
+  <p *ngIf="cargando">Cargando estadísticas...</p>
+
+  <div *ngIf="!cargando">
+
+    <p><strong>Total de libros:</strong> {{ totalLibros }}</p>
+    <p><strong>Total de categorías:</strong> {{ totalCategorias }}</p>
+
+    <h3 style="margin-top:16px;">Libros por categoría</h3>
+
+    <ul>
+      <li *ngFor="let item of librosPorCategoria">
+        {{ item.categoria }}: {{ item.cantidad }} libro(s)
+      </li>
+    </ul>
+
+  </div>
+
+</section>
+

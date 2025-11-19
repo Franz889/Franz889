@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/" style="color:white; margin-right:8px; text-decoration:none">Inicio</a>
       <a routerLink="/categorias" style="color:white; text-decoration:none">Categorías</a>
       <a routerLink="/libros" style="color:white; margin-left:8px; text-decoration:none">Libros</a>
-
+      <a routerLink="/estadisticas" style="color:white; margin-left:8px; text-decoration:none">Estadísticas</a>
     </header>
   `,
 })

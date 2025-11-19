@@ -5,8 +5,10 @@ import {
   collectionData,
   addDoc,
   doc,
+  docData,
   updateDoc,
   deleteDoc
+
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Categoria, Libro } from './models';
@@ -44,6 +46,11 @@ export class FirestoreService {
   listarLibros(): Observable<Libro[]> {
     const librosRef = collection(this.firestore, 'libros');
     return collectionData(librosRef, { idField: 'id' }) as Observable<Libro[]>;
+    
+  }
+  obtenerLibro(id: string): Observable<Libro | undefined> {
+    const ref = doc(this.firestore, `libros/${id}`);
+    return docData(ref, { idField: 'id' }) as Observable<Libro | undefined>;
   }
 
   crearLibro(libro: Omit<Libro, 'id'>) {
