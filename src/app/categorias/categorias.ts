@@ -15,68 +15,213 @@ import { Categoria } from '../core/models';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
-    <section style="padding:16px; max-width:720px; margin:auto">
-      <h2>📂 Categorías</h2>
+    <section style="padding:24px 16px; max-width:900px; margin:auto;">
+
+      <!-- Título -->
+      <header style="margin-bottom:12px;">
+        <h2 style="font-size:24px; margin:0 0 4px; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">📂</span>
+          <span>Categorías</span>
+        </h2>
+        <p style="margin:0; font-size:13px; opacity:.8;">
+          Crea y administra las categorías para organizar los libros de la biblioteca virtual.
+        </p>
+      </header>
 
       <!-- Mensajes -->
-      <div *ngIf="mensajeOk" style="margin:8px 0; padding:8px; border-radius:4px; background:#d1fae5;">
-        {{ mensajeOk }}
+      <div *ngIf="mensajeOk"
+           style="margin:8px 0; padding:8px 10px; border-radius:4px; background:#e8f5e9; border:1px solid #c8e6c9; font-size:13px;">
+        ✅ {{ mensajeOk }}
       </div>
-      <div *ngIf="mensajeError" style="margin:8px 0; padding:8px; border-radius:4px; background:#fee2e2;">
-        {{ mensajeError }}
+      <div *ngIf="mensajeError"
+           style="margin:8px 0; padding:8px 10px; border-radius:4px; background:#ffebee; border:1px solid #ffcdd2; font-size:13px;">
+        ⚠️ {{ mensajeError }}
       </div>
 
       <!-- Filtro de búsqueda -->
-      <div style="display:flex; gap:8px; margin:12px 0; flex-wrap:wrap">
-        <input [(ngModel)]="search" name="search" placeholder="🔎 Buscar por nombre o descripción" />
-        <button type="button" (click)="search=''">Limpiar filtro</button>
-      </div>
+      <section style="
+        display:flex;
+        gap:8px;
+        margin:14px 0;
+        align-items:center;
+        flex-wrap:wrap;
+        padding:10px 12px;
+        border-radius:6px;
+        background:#fafafa;
+        border:1px solid #e0e0e0;
+      ">
+        <input
+          [(ngModel)]="search"
+          name="search"
+          placeholder="🔎 Buscar por nombre o descripción"
+          style="flex:1 1 220px; min-width:180px; padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+        />
+        <button
+          type="button"
+          (click)="search='';"
+          style="
+            padding:6px 10px;
+            border-radius:4px;
+            border:1px solid #bdbdbd;
+            background:white;
+            cursor:pointer;
+            font-size:13px;
+          "
+        >
+          Limpiar filtro
+        </button>
+      </section>
 
       <!-- FORMULARIO REACTIVO -->
-      <h3>{{ editando ? 'Editar categoría' : 'Agregar categoría' }}</h3>
+      <section style="
+        margin:16px 0;
+        padding:14px 16px;
+        border-radius:6px;
+        background:#fffde7;
+        border:1px solid #ffe082;
+      ">
+        <h3 style="margin:0 0 10px; font-size:18px;">
+          {{ editando ? 'Editar categoría' : 'Agregar categoría' }}
+        </h3>
 
-      <form [formGroup]="formCategoria"
-            (ngSubmit)="guardar()"
-            style="display:flex; gap:8px; margin:12px 0; flex-wrap:wrap">
-        <input type="hidden" formControlName="id" />
+        <form
+          [formGroup]="formCategoria"
+          (ngSubmit)="guardar()"
+          style="
+            display:grid;
+            grid-template-columns: 1.3fr 2fr auto;
+            gap:8px 10px;
+            align-items:flex-start;
+          "
+        >
+          <input type="hidden" formControlName="id" />
 
-        <div style="display:flex; flex-direction:column; flex:1 1 180px;">
-          <input formControlName="nombre" placeholder="Nombre" />
-          <small *ngIf="nombre?.invalid && (nombre?.touched || nombre?.dirty)" style="color:#c62828; font-size:13px;">
-            <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio.</span>
-            <span *ngIf="nombre?.errors?.['minlength']">Mínimo 3 caracteres.</span>
-          </small>
-        </div>
+          <!-- Nombre -->
+          <div style="display:flex; flex-direction:column;">
+            <label style="font-size:12px; margin-bottom:2px;">Nombre *</label>
+            <input
+              formControlName="nombre"
+              placeholder="Ej: Programación"
+              style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+            />
+            <small
+              *ngIf="nombre?.invalid && (nombre?.touched || nombre?.dirty)"
+              style="color:#c62828; font-size:11px; margin-top:2px;"
+            >
+              <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio. </span>
+              <span *ngIf="nombre?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+            </small>
+          </div>
 
-        <div style="display:flex; flex-direction:column; flex:2 1 220px;">
-          <input formControlName="descripcion" placeholder="Descripción" />
-        </div>
+          <!-- Descripción -->
+          <div style="display:flex; flex-direction:column;">
+            <label style="font-size:12px; margin-bottom:2px;">Descripción</label>
+            <input
+              formControlName="descripcion"
+              placeholder="Ej: Libros relacionados a desarrollo de software"
+              style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+            />
+          </div>
 
-        <div style="display:flex; gap:4px; align-items:center;">
-          <button type="submit">
-            {{ editando ? 'Actualizar' : 'Agregar' }}
-          </button>
-          <button type="button" (click)="cancelarEdicion()">Limpiar</button>
-        </div>
-      </form>
+          <!-- Botones -->
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+            <button
+              type="submit"
+              [disabled]="formCategoria.invalid"
+              style="
+                padding:6px 12px;
+                border-radius:4px;
+                border:none;
+                cursor:pointer;
+                font-size:13px;
+                background:#2e7d32;
+                color:white;
+              "
+            >
+              {{ editando ? 'Actualizar' : 'Agregar' }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelarEdicion()"
+              style="
+                padding:4px 10px;
+                border-radius:4px;
+                border:1px solid #bdbdbd;
+                background:white;
+                cursor:pointer;
+                font-size:12px;
+              "
+            >
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </section>
 
       <!-- Mensaje si no hay categorías -->
-      <p *ngIf="categoriasFiltradas.length === 0">
-        No hay categorías que coincidan.
+      <p *ngIf="categoriasFiltradas.length === 0"
+         style="margin-top:8px; font-size:13px; opacity:.7;">
+        No hay categorías que coincidan con el filtro actual.
       </p>
 
       <!-- LISTA DE CATEGORÍAS -->
-      <ul>
-        <li *ngFor="let c of categoriasFiltradas; trackBy: trackById" style="margin:6px 0">
-          <strong>{{ c.nombre }}</strong>
-          <span *ngIf="c.descripcion"> – {{ c.descripcion }}</span>
-          <small style="opacity:.6"> • {{ c.id }}</small>
-          <div style="margin-top:4px;">
-            <button type="button" (click)="editar(c)">Editar</button>
-            <button type="button" (click)="borrar(c)">Eliminar</button>
-          </div>
-        </li>
-      </ul>
+      <section *ngIf="categoriasFiltradas.length > 0" style="margin-top:8px;">
+        <ul style="list-style:none; padding:0; margin:0;">
+          <li
+            *ngFor="let c of categoriasFiltradas; trackBy: trackById"
+            style="
+              margin:6px 0;
+              padding:8px 10px;
+              border-radius:6px;
+              border:1px solid #e0e0e0;
+              background:#fafafa;
+              display:flex;
+              flex-direction:column;
+              gap:4px;
+            "
+          >
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <strong>{{ c.nombre }}</strong>
+                <span *ngIf="c.descripcion"> – {{ c.descripcion }}</span>
+              </div>
+              <small style="opacity:.6; font-size:11px;">ID: {{ c.id }}</small>
+            </div>
+
+            <div style="margin-top:4px; display:flex; gap:6px;">
+              <button
+                type="button"
+                (click)="editar(c)"
+                style="
+                  padding:3px 8px;
+                  font-size:12px;
+                  border-radius:4px;
+                  border:1px solid #1976d2;
+                  background:#e3f2fd;
+                  cursor:pointer;
+                "
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                (click)="borrar(c)"
+                style="
+                  padding:3px 8px;
+                  font-size:12px;
+                  border-radius:4px;
+                  border:1px solid #d32f2f;
+                  background:#ffebee;
+                  cursor:pointer;
+                "
+              >
+                Eliminar
+              </button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
     </section>
   `,
 })

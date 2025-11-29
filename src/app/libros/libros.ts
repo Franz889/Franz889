@@ -7,21 +7,30 @@ import {
   Validators,
   FormGroup
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';            
+import { RouterModule } from '@angular/router';
 import { FirestoreService } from '../core/firestore';
 import { Categoria, Libro } from '../core/models';
 import { EstadoLibroPipe } from '../core/estado.pipe';
-
+import { AuthService } from '../core/auth';   // 👈 NUEVO
 
 @Component({
   selector: 'app-libros',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, EstadoLibroPipe ],  
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    EstadoLibroPipe
+  ],
   templateUrl: './libros.html',
 })
 export class LibrosComponent {
   categorias: Categoria[] = [];
   libros: Libro[] = [];
+
+  // uid del usuario actual (null si no hay sesión todavía)
+  currentUid: string | null = null;      // 👈 NUEVO
 
   // filtros
   search = '';
@@ -35,7 +44,8 @@ export class LibrosComponent {
 
   constructor(
     private fs: FirestoreService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private auth: AuthService           // 👈 NUEVO
   ) {
     // inicializar formulario
     this.formLibro = this.fb.group({
@@ -50,6 +60,11 @@ export class LibrosComponent {
       categoriaId: ['', Validators.required],
     });
 
+    // escuchar cambios de usuario logueado 👇
+    this.auth.user$.subscribe(user => {
+      this.currentUid = user?.uid ?? null;
+    });
+
     this.fs.listarCategorias().subscribe(cs => this.categorias = cs);
     this.fs.listarLibros().subscribe(ls => this.libros = ls);
   }
@@ -62,12 +77,17 @@ export class LibrosComponent {
   get editando() { return !!this.formLibro.get('id')?.value; }
 
   // 🔎 lista filtrada + ordenada por título
+  //    y SOLO muestra libros del usuario actual
   get librosFiltrados(): Libro[] {
     const s = this.search.trim().toLowerCase();
     const cat = this.filterCategoriaId;
+    const uid = this.currentUid;
 
     return this.libros
       .filter(l => {
+        // 🔐 si hay usuario logueado, solo sus libros
+        if (uid && l.creadoPorUid !== uid) return false;
+
         const coincideTexto =
           !s ||
           (l.titulo ?? '').toLowerCase().includes(s) ||
@@ -97,6 +117,7 @@ export class LibrosComponent {
     }
 
     const { id, titulo, autor, anio, categoriaId } = this.formLibro.value;
+    const uid = this.currentUid ?? 'anon';   // 👈 usa el uid real
 
     try {
       if (id) {
@@ -117,7 +138,7 @@ export class LibrosComponent {
           anio: anio ?? undefined,
           categoriaId: categoriaId ?? '',
           estado: 'disponible',
-          creadoPorUid: 'anon',
+          creadoPorUid: uid,          // 👈 aquí se guarda el usuario
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
