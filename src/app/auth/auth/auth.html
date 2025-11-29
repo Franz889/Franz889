@@ -1,0 +1,55 @@
+<div class="auth-bg">
+  <div class="auth-card">
+
+    <div style="text-align:center;">
+      <span style="font-size:40px;">🔒</span>
+      <h2>{{ modo === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}</h2>
+      <p style="opacity:.8;">Biblioteca Virtual</p>
+    </div>
+
+    <!-- mensajes -->
+    <div *ngIf="mensajeOk" style="padding:8px; margin-top:10px; background:#e8f5e9; border-left:4px solid #2e7d32;">
+      {{ mensajeOk }}
+    </div>
+
+    <div *ngIf="mensajeError" style="padding:8px; margin-top:10px; background:#ffebee; border-left:4px solid #c62828;">
+      {{ mensajeError }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" style="margin-top:20px;">
+
+      <label>Email</label>
+      <input class="auth-input" type="email" formControlName="email" placeholder="tucorreo@ejemplo.com" />
+
+      <label style="margin-top:12px;">Contraseña</label>
+      <input class="auth-input" type="password" formControlName="password" placeholder="mínimo 6 caracteres" />
+
+      <div *ngIf="modo === 'register'" style="margin-top:12px;">
+        <label>Confirmar contraseña</label>
+        <input class="auth-input" type="password" formControlName="confirmPassword" />
+      </div>
+
+      <button class="auth-btn" style="margin-top:18px;" [disabled]="cargando">
+        {{ modo === 'login' ? 'Ingresar' : 'Crear cuenta' }}
+      </button>
+
+    </form>
+
+    <div style="text-align:center; margin-top:18px;">
+      <span *ngIf="modo === 'login'">
+        ¿No tienes cuenta?
+        <span class="auth-link" (click)="cambiarModo('register')">Crear una nueva</span>
+      </span>
+
+      <span *ngIf="modo === 'register'">
+        ¿Ya tienes cuenta?
+        <span class="auth-link" (click)="cambiarModo('login')">Inicia sesión</span>
+      </span>
+    </div>
+
+    <div style="text-align:center; margin-top:10px;">
+      <a routerLink="/" style="font-size:13px; opacity:.7;">← Volver al inicio</a>
+    </div>
+
+  </div>
+</div>

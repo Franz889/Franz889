@@ -1,118 +1,273 @@
-<section style="padding:16px; max-width:900px; margin:auto">
-  <h2>📚 Libros</h2>
+<section style="padding:24px 16px; max-width:1100px; margin:auto">
+
+  <!-- Título -->
+  <header style="margin-bottom:12px;">
+    <h2 style="font-size:24px; margin:0 0 4px; display:flex; align-items:center; gap:8px;">
+      <span style="font-size:22px;">📚</span>
+      <span>Libros</span>
+    </h2>
+    <p style="margin:0; font-size:13px; opacity:.8;">
+      Administra los libros de tu biblioteca: agrega, edita, filtra y consulta el detalle.
+    </p>
+  </header>
 
   <!-- Mensajes globales -->
-  <div *ngIf="mensajeOk" style="margin:8px 0; padding:8px; border-radius:4px; background:#d1fae5;">
-    {{ mensajeOk }}
+  <div *ngIf="mensajeOk"
+       style="margin:8px 0; padding:8px 10px; border-radius:4px; background:#e8f5e9; border:1px solid #c8e6c9; font-size:13px;">
+    ✅ {{ mensajeOk }}
   </div>
-  <div *ngIf="mensajeError" style="margin:8px 0; padding:8px; border-radius:4px; background:#fee2e2;">
-    {{ mensajeError }}
+  <div *ngIf="mensajeError"
+       style="margin:8px 0; padding:8px 10px; border-radius:4px; background:#ffebee; border:1px solid #ffcdd2; font-size:13px;">
+    ⚠️ {{ mensajeError }}
   </div>
 
   <!-- 🔎 Filtros -->
-  <div style="display:flex; gap:8px; margin:12px 0; align-items:center; flex-wrap:wrap">
-    <input [(ngModel)]="search" name="search" placeholder="🔎 Buscar por título o autor" />
-    <select [(ngModel)]="filterCategoriaId" name="filterCategoriaId">
+  <section style="
+    display:flex;
+    gap:8px;
+    margin:14px 0;
+    align-items:center;
+    flex-wrap:wrap;
+    padding:10px 12px;
+    border-radius:6px;
+    background:#fafafa;
+    border:1px solid #e0e0e0;
+  ">
+    <input
+      [(ngModel)]="search"
+      name="search"
+      placeholder="🔎 Buscar por título o autor"
+      style="flex:2; min-width:180px; padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+    />
+    <select
+      [(ngModel)]="filterCategoriaId"
+      name="filterCategoriaId"
+      style="flex:1; min-width:160px; padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+    >
       <option value="">Todas las categorías</option>
       <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
     </select>
-    <button type="button" (click)="search=''; filterCategoriaId='';">Limpiar filtros</button>
-  </div>
+    <button
+      type="button"
+      (click)="search=''; filterCategoriaId='';"
+      style="
+        padding:6px 10px;
+        border-radius:4px;
+        border:1px solid #bdbdbd;
+        background:white;
+        cursor:pointer;
+        font-size:13px;
+      "
+    >
+      Limpiar filtros
+    </button>
+  </section>
 
   <!-- ================= FORMULARIO REACTIVO ================= -->
-  <h3 style="margin-top:12px;">
-    {{ editando ? 'Editar libro' : 'Agregar libro' }}
-  </h3>
+  <section style="
+    margin:16px 0;
+    padding:14px 16px;
+    border-radius:6px;
+    background:#fffde7;
+    border:1px solid #ffe082;
+  ">
+    <h3 style="margin:0 0 10px; font-size:18px;">
+      {{ editando ? 'Editar libro' : 'Agregar libro' }}
+    </h3>
 
-  <form [formGroup]="formLibro"
-        (ngSubmit)="guardar()"
-        style="display:grid; grid-template-columns: 1fr 1fr 120px 1fr 130px; gap:8px; align-items:flex-start; margin:12px 0;">
+    <form
+      [formGroup]="formLibro"
+      (ngSubmit)="guardar()"
+      style="
+        display:grid;
+        grid-template-columns: 2fr 2fr 1fr 1.3fr auto;
+        gap:8px 10px;
+        align-items:flex-start;
+      "
+    >
+      <!-- id oculto -->
+      <input type="hidden" formControlName="id" />
 
-    <!-- id oculto -->
-    <input type="hidden" formControlName="id" />
+      <!-- TÍTULO -->
+      <div style="display:flex; flex-direction:column;">
+        <label style="font-size:12px; margin-bottom:2px;">Título *</label>
+        <input
+          formControlName="titulo"
+          placeholder="Título"
+          style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+        />
+        <small
+          *ngIf="titulo?.invalid && (titulo?.touched || titulo?.dirty)"
+          style="color:#dc2626; font-size:11px; margin-top:2px;"
+        >
+          <span *ngIf="titulo?.errors?.['required']">El título es obligatorio. </span>
+          <span *ngIf="titulo?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+        </small>
+      </div>
 
-    <!-- TÍTULO -->
-    <div style="display:flex; flex-direction:column;">
-      <input formControlName="titulo" placeholder="Título" />
-      <small *ngIf="titulo?.invalid && (titulo?.touched || titulo?.dirty)" style="color:#dc2626;">
-        <span *ngIf="titulo?.errors?.['required']">El título es obligatorio.</span>
-        <span *ngIf="titulo?.errors?.['minlength']">Mínimo 3 caracteres.</span>
-      </small>
-    </div>
+      <!-- AUTOR -->
+      <div style="display:flex; flex-direction:column;">
+        <label style="font-size:12px; margin-bottom:2px;">Autor *</label>
+        <input
+          formControlName="autor"
+          placeholder="Autor"
+          style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+        />
+        <small
+          *ngIf="autor?.invalid && (autor?.touched || autor?.dirty)"
+          style="color:#dc2626; font-size:11px; margin-top:2px;"
+        >
+          <span *ngIf="autor?.errors?.['required']">El autor es obligatorio. </span>
+          <span *ngIf="autor?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+        </small>
+      </div>
 
-    <!-- AUTOR -->
-    <div style="display:flex; flex-direction:column;">
-      <input formControlName="autor" placeholder="Autor" />
-      <small *ngIf="autor?.invalid && (autor?.touched || autor?.dirty)" style="color:#dc2626;">
-        <span *ngIf="autor?.errors?.['required']">El autor es obligatorio.</span>
-        <span *ngIf="autor?.errors?.['minlength']">Mínimo 3 caracteres.</span>
-      </small>
-    </div>
+      <!-- AÑO -->
+      <div style="display:flex; flex-direction:column;">
+        <label style="font-size:12px; margin-bottom:2px;">Año *</label>
+        <input
+          formControlName="anio"
+          type="number"
+          placeholder="Año"
+          style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px; text-align:center;"
+        />
+        <small
+          *ngIf="anio?.invalid && (anio?.touched || anio?.dirty)"
+          style="color:#dc2626; font-size:11px; margin-top:2px;"
+        >
+          <span *ngIf="anio?.errors?.['required']">El año es obligatorio. </span>
+          <span *ngIf="anio?.errors?.['min']">Año mínimo 1900. </span>
+          <span *ngIf="anio?.errors?.['max']">El año no puede ser mayor al actual.</span>
+        </small>
+      </div>
 
-    <!-- AÑO -->
-    <div style="display:flex; flex-direction:column;">
-      <input formControlName="anio" type="number" placeholder="Año" />
-      <small *ngIf="anio?.invalid && (anio?.touched || anio?.dirty)" style="color:#dc2626;">
-        <span *ngIf="anio?.errors?.['required']">El año es obligatorio.</span>
-        <span *ngIf="anio?.errors?.['min']">Año mínimo 1900.</span>
-        <span *ngIf="anio?.errors?.['max']">El año no puede ser mayor al actual.</span>
-      </small>
-    </div>
+      <!-- CATEGORÍA -->
+      <div style="display:flex; flex-direction:column;">
+        <label style="font-size:12px; margin-bottom:2px;">Categoría *</label>
+        <select
+          formControlName="categoriaId"
+          style="padding:6px 8px; border-radius:4px; border:1px solid #c4c4c4; font-size:13px;"
+        >
+          <option value="">-- Categoría --</option>
+          <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+        </select>
+        <small
+          *ngIf="categoriaId?.invalid && (categoriaId?.touched || categoriaId?.dirty)"
+          style="color:#dc2626; font-size:11px; margin-top:2px;"
+        >
+          Selecciona una categoría.
+        </small>
+      </div>
 
-    <!-- CATEGORÍA -->
-    <div style="display:flex; flex-direction:column;">
-      <select formControlName="categoriaId">
-        <option value="">-- Categoría --</option>
-        <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
-      </select>
-      <small *ngIf="categoriaId?.invalid && (categoriaId?.touched || categoriaId?.dirty)" style="color:#dc2626;">
-        Selecciona una categoría.
-      </small>
-    </div>
-
-    <!-- BOTONES -->
-    <div style="display:flex; gap:4px; justify-content:flex-end;">
-      <button type="submit">
-        {{ editando ? 'Actualizar' : 'Agregar' }}
-      </button>
-      <button type="button" (click)="cancelarEdicion()">Limpiar</button>
-    </div>
-  </form>
-
-  <hr style="margin:16px 0;">
+      <!-- BOTONES -->
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+        <button
+          type="submit"
+          [disabled]="formLibro.invalid"
+          [style.opacity]="formLibro.invalid ? '0.6' : '1'"
+          style="
+            padding:6px 12px;
+            border-radius:4px;
+            border:none;
+            cursor:pointer;
+            font-size:13px;
+            background:#2e7d32;
+            color:white;
+          "
+        >
+          {{ editando ? 'Actualizar' : 'Agregar' }}
+        </button>
+        <button
+          type="button"
+          (click)="cancelarEdicion()"
+          style="
+            padding:4px 10px;
+            border-radius:4px;
+            border:1px solid #bdbdbd;
+            background:white;
+            cursor:pointer;
+            font-size:12px;
+          "
+        >
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </section>
 
   <!-- ================= LISTA ================= -->
-  <table border="1" cellpadding="6" style="border-collapse:collapse; width:100%">
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Autor</th>
-        <th>Año</th>
-        <th>Categoría</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let l of librosFiltrados; trackBy: trackById">
-        <td>{{ l.titulo }}</td>
-        <td>{{ l.autor }}</td>
-        <td style="text-align:center">{{ l.anio }}</td>
-        <td style="text-align:center">
-          {{ getNombreCategoria(l.categoriaId) }}
-        </td>
-        <td style="text-align:center">{{ l.estado | estadoLibro }}</td>
-        <td style="white-space:nowrap; text-align:center">
-          <a [routerLink]="['/libros', l.id]">Ver detalle</a>
-          <button type="button" (click)="editar(l)" style="margin-left:4px;">Editar</button>
-          <button type="button" (click)="borrar(l.id)" style="margin-left:4px;">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <section style="
+    border-radius:6px;
+    border:1px solid #e0e0e0;
+    background:white;
+    overflow-x:auto;
+  ">
+    <table cellpadding="6" style="border-collapse:collapse; width:100%; font-size:13px;">
+      <thead style="background:#f5f5f5;">
+        <tr>
+          <th style="text-align:left; border-bottom:1px solid #ddd;">Título</th>
+          <th style="text-align:left; border-bottom:1px solid #ddd;">Autor</th>
+          <th style="text-align:center; border-bottom:1px solid #ddd; width:70px;">Año</th>
+          <th style="text-align:center; border-bottom:1px solid #ddd;">Categoría</th>
+          <th style="text-align:center; border-bottom:1px solid #ddd; width:90px;">Estado</th>
+          <th style="text-align:center; border-bottom:1px solid #ddd; width:190px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of librosFiltrados; trackBy: trackById" style="border-bottom:1px solid #eee;">
+          <td>{{ l.titulo }}</td>
+          <td>{{ l.autor }}</td>
+          <td style="text-align:center">{{ l.anio }}</td>
+          <td style="text-align:center">
+            {{ getNombreCategoria(l.categoriaId) }}
+          </td>
+          <td style="text-align:center">{{ l.estado | estadoLibro }}</td>
+          <td style="white-space:nowrap; text-align:center;">
+            <a
+              [routerLink]="['/libros', l.id]"
+              style="margin-right:6px; font-size:12px; text-decoration:none; color:#1565c0;"
+            >
+              Ver detalle
+            </a>
+            <button
+              type="button"
+              (click)="editar(l)"
+              style="
+                padding:3px 8px;
+                margin-right:4px;
+                font-size:12px;
+                border-radius:4px;
+                border:1px solid #1976d2;
+                background:#e3f2fd;
+                cursor:pointer;
+              "
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              (click)="borrar(l.id)"
+              style="
+                padding:3px 8px;
+                font-size:12px;
+                border-radius:4px;
+                border:1px solid #d32f2f;
+                background:#ffebee;
+                cursor:pointer;
+              "
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
 
-  <p *ngIf="libros.length > 0 && librosFiltrados.length === 0"
-     style="opacity:.7; margin-top:8px">
-    No hay resultados que coincidan con el filtro.
-  </p>
+        <tr *ngIf="libros.length > 0 && librosFiltrados.length === 0">
+          <td colspan="6" style="text-align:center; padding:12px; font-size:13px; opacity:.7;">
+            No hay resultados que coincidan con el filtro.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
 </section>

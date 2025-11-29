@@ -1,0 +1,64 @@
+/* Fondo general */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(
+    135deg,
+    #f5f5f5 0%,
+    #e8e8e8 50%,
+    #dcdcdc 100%
+  );
+  background-attachment: fixed;
+}
+
+/* TARJETA */
+.auth-card {
+  width: 400px;
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  animation: fadeIn .4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* Inputs */
+.auth-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+/* Botón */
+.auth-btn {
+  width: 100%;
+  background: #b71c1c;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  background: #d32f2f;
+}
+
+/* Registrarse / enlace */
+.auth-link {
+  font-size: 13px;
+  color: #1565c0;
+  cursor: pointer;
+  text-decoration: underline;
+}
