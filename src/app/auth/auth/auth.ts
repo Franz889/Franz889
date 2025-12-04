@@ -8,13 +8,48 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth';
+import {
+  trigger,
+  transition,
+  style,
+  animate
+} from '@angular/animations';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './auth.html',
-  styleUrls: ['./auth.css']
+  styleUrls: ['./auth.css'],
+  animations: [
+    // Animación para la página completa (fondo)
+    trigger('pageFade', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('250ms ease-out', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0 }))
+      ])
+    ]),
+
+    // Animación para la tarjeta del login
+    trigger('cardAnim', [
+      transition(':enter', [
+        style({
+          opacity: 0,
+          transform: 'translateY(-10px) scale(0.97)'
+        }),
+        animate(
+          '280ms 80ms ease-out',
+          style({
+            opacity: 1,
+            transform: 'translateY(0) scale(1)'
+          })
+        )
+      ])
+    ])
+  ]
 })
 export class AuthComponent {
   modo: 'login' | 'register' = 'login';
@@ -76,7 +111,7 @@ export class AuthComponent {
       }
 
       this.form.reset();
-      this.router.navigate(['/libros']); // puedes cambiar a otra ruta si quieres
+      this.router.navigate(['/libros']);
     } catch (err: any) {
       console.error(err);
       this.mensajeError = err?.message || 'Error en autenticación.';
