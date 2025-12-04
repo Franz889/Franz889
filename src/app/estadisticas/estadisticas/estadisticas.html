@@ -2,22 +2,31 @@
 
   <h2>📊 Estadísticas de la Biblioteca</h2>
 
+  <!-- Mensaje de carga -->
   <p *ngIf="cargando">Cargando estadísticas...</p>
 
+  <!-- Contenido cuando ya cargó -->
   <div *ngIf="!cargando">
 
-    <p><strong>Total de libros:</strong> {{ totalLibros }}</p>
-    <p><strong>Total de categorías:</strong> {{ totalCategorias }}</p>
+    <!-- Fecha usando pipe date -->
+    <p style="font-size:13px; opacity:.8;">
+      Fecha de consulta: {{ ahora | date:'short' }}
+    </p>
+
+    <!-- Totales con pipe number -->
+    <p><strong>Total de libros:</strong> {{ totalLibros | number }}</p>
+    <p><strong>Total de categorías:</strong> {{ totalCategorias | number }}</p>
 
     <h3 style="margin-top:16px;">Libros por categoría</h3>
 
     <ul>
       <li *ngFor="let item of librosPorCategoria">
-        {{ item.categoria }}: {{ item.cantidad }} libro(s)
+        <!-- nombre en mayúsculas + cantidad con number -->
+        <strong>{{ item.categoria | uppercase }}</strong>:
+        {{ item.cantidad | number }} libro(s)
       </li>
     </ul>
 
   </div>
 
 </section>
-

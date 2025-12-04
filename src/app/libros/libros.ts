@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
 import { FirestoreService } from '../core/firestore';
 import { Categoria, Libro } from '../core/models';
 import { EstadoLibroPipe } from '../core/estado.pipe';
-import { AuthService } from '../core/auth';   // 👈 NUEVO
+import { AuthService } from '../core/auth';
 
 @Component({
   selector: 'app-libros',
@@ -29,8 +29,11 @@ export class LibrosComponent {
   categorias: Categoria[] = [];
   libros: Libro[] = [];
 
+  // indicador de carga
+  cargando = true;
+
   // uid del usuario actual (null si no hay sesión todavía)
-  currentUid: string | null = null;      // 👈 NUEVO
+  currentUid: string | null = null;
 
   // filtros
   search = '';
@@ -45,7 +48,7 @@ export class LibrosComponent {
   constructor(
     private fs: FirestoreService,
     private fb: FormBuilder,
-    private auth: AuthService           // 👈 NUEVO
+    private auth: AuthService
   ) {
     // inicializar formulario
     this.formLibro = this.fb.group({
@@ -60,13 +63,19 @@ export class LibrosComponent {
       categoriaId: ['', Validators.required],
     });
 
-    // escuchar cambios de usuario logueado 👇
+    // escuchar cambios de usuario logueado
     this.auth.user$.subscribe(user => {
       this.currentUid = user?.uid ?? null;
     });
 
+    // cargar categorías
     this.fs.listarCategorias().subscribe(cs => this.categorias = cs);
-    this.fs.listarLibros().subscribe(ls => this.libros = ls);
+
+    // cargar libros
+    this.fs.listarLibros().subscribe(ls => {
+      this.libros = ls;
+      this.cargando = false;
+    });
   }
 
   // Getters para el HTML
@@ -76,8 +85,7 @@ export class LibrosComponent {
   get categoriaId() { return this.formLibro.get('categoriaId'); }
   get editando() { return !!this.formLibro.get('id')?.value; }
 
-  // 🔎 lista filtrada + ordenada por título
-  //    y SOLO muestra libros del usuario actual
+  // lista filtrada + ordenada + solo libros del usuario actual
   get librosFiltrados(): Libro[] {
     const s = this.search.trim().toLowerCase();
     const cat = this.filterCategoriaId;
@@ -85,7 +93,7 @@ export class LibrosComponent {
 
     return this.libros
       .filter(l => {
-        // 🔐 si hay usuario logueado, solo sus libros
+        // si hay usuario logueado, solo ver sus libros
         if (uid && l.creadoPorUid !== uid) return false;
 
         const coincideTexto =
@@ -106,7 +114,7 @@ export class LibrosComponent {
     return cat ? cat.nombre : '-';
   }
 
-  // 🟢 Crear / Actualizar libro
+  // Crear / Actualizar libro
   async guardar() {
     this.mensajeOk = '';
     this.mensajeError = '';
@@ -117,7 +125,7 @@ export class LibrosComponent {
     }
 
     const { id, titulo, autor, anio, categoriaId } = this.formLibro.value;
-    const uid = this.currentUid ?? 'anon';   // 👈 usa el uid real
+    const uid = this.currentUid ?? 'anon';
 
     try {
       if (id) {
@@ -138,7 +146,7 @@ export class LibrosComponent {
           anio: anio ?? undefined,
           categoriaId: categoriaId ?? '',
           estado: 'disponible',
-          creadoPorUid: uid,          // 👈 aquí se guarda el usuario
+          creadoPorUid: uid,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
@@ -152,7 +160,30 @@ export class LibrosComponent {
     }
   }
 
-  // ✏️ Cargar datos para editar
+  // Cambiar estado disponible / prestado
+  async cambiarEstado(libro: Libro, nuevoEstado: 'disponible' | 'prestado') {
+    if (!libro.id) return;
+
+    this.mensajeOk = '';
+    this.mensajeError = '';
+
+    try {
+      await this.fs.actualizarLibro(libro.id, {
+        estado: nuevoEstado,
+        updatedAt: Date.now(),
+      });
+
+      this.mensajeOk =
+        nuevoEstado === 'disponible'
+          ? 'Libro marcado como disponible.'
+          : 'Libro marcado como prestado.';
+    } catch (err) {
+      console.error(err);
+      this.mensajeError = 'No se pudo cambiar el estado del libro.';
+    }
+  }
+
+  // Cargar datos para editar
   editar(libro: Libro) {
     this.mensajeOk = '';
     this.mensajeError = '';
@@ -170,7 +201,7 @@ export class LibrosComponent {
     this.formLibro.reset();
   }
 
-  // 🗑 Eliminar
+  // Eliminar
   async borrar(id?: string) {
     if (!id) return;
     const ok = confirm('¿Seguro que quieres eliminar este libro?');

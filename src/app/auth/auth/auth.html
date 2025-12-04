@@ -1,5 +1,5 @@
-<div class="auth-bg">
-  <div class="auth-card">
+<div class="auth-bg" [@pageFade]>
+  <div class="auth-card" [@cardAnim]>
 
     <div style="text-align:center;">
       <span style="font-size:40px;">🔒</span>
@@ -19,14 +19,28 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" style="margin-top:20px;">
 
       <label>Email</label>
-      <input class="auth-input" type="email" formControlName="email" placeholder="tucorreo@ejemplo.com" />
+      <input
+        class="auth-input"
+        type="email"
+        formControlName="email"
+        placeholder="tucorreo@ejemplo.com"
+      />
 
       <label style="margin-top:12px;">Contraseña</label>
-      <input class="auth-input" type="password" formControlName="password" placeholder="mínimo 6 caracteres" />
+      <input
+        class="auth-input"
+        type="password"
+        formControlName="password"
+        placeholder="mínimo 6 caracteres"
+      />
 
       <div *ngIf="modo === 'register'" style="margin-top:12px;">
         <label>Confirmar contraseña</label>
-        <input class="auth-input" type="password" formControlName="confirmPassword" />
+        <input
+          class="auth-input"
+          type="password"
+          formControlName="confirmPassword"
+        />
       </div>
 
       <button class="auth-btn" style="margin-top:18px;" [disabled]="cargando">

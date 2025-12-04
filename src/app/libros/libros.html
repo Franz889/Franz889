@@ -202,6 +202,12 @@
     background:white;
     overflow-x:auto;
   ">
+
+    <!-- Mensaje de carga -->
+    <p *ngIf="cargando" style="font-size:13px; opacity:.7; margin:8px 12px;">
+      Cargando libros desde Firestore...
+    </p>
+
     <table cellpadding="6" style="border-collapse:collapse; width:100%; font-size:13px;">
       <thead style="background:#f5f5f5;">
         <tr>
@@ -210,11 +216,15 @@
           <th style="text-align:center; border-bottom:1px solid #ddd; width:70px;">Año</th>
           <th style="text-align:center; border-bottom:1px solid #ddd;">Categoría</th>
           <th style="text-align:center; border-bottom:1px solid #ddd; width:90px;">Estado</th>
-          <th style="text-align:center; border-bottom:1px solid #ddd; width:190px;">Acciones</th>
+          <th style="text-align:center; border-bottom:1px solid #ddd; width:260px;">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let l of librosFiltrados; trackBy: trackById" style="border-bottom:1px solid #eee;">
+        <tr
+          *ngFor="let l of librosFiltrados; trackBy: trackById"
+          [ngStyle]="l.estado === 'prestado' ? {'background-color': '#fff3e0'} : null"
+          style="border-bottom:1px solid #eee;"
+        >
           <td>{{ l.titulo }}</td>
           <td>{{ l.autor }}</td>
           <td style="text-align:center">{{ l.anio }}</td>
@@ -223,12 +233,14 @@
           </td>
           <td style="text-align:center">{{ l.estado | estadoLibro }}</td>
           <td style="white-space:nowrap; text-align:center;">
+
             <a
               [routerLink]="['/libros', l.id]"
               style="margin-right:6px; font-size:12px; text-decoration:none; color:#1565c0;"
             >
               Ver detalle
             </a>
+
             <button
               type="button"
               (click)="editar(l)"
@@ -244,6 +256,23 @@
             >
               Editar
             </button>
+
+            <button
+              type="button"
+              (click)="cambiarEstado(l, l.estado === 'disponible' ? 'prestado' : 'disponible')"
+              style="
+                padding:3px 8px;
+                margin-right:4px;
+                font-size:12px;
+                border-radius:4px;
+                border:1px solid #8d6e63;
+                background:#efebe9;
+                cursor:pointer;
+              "
+            >
+              {{ l.estado === 'disponible' ? 'Marcar prestado' : 'Marcar disponible' }}
+            </button>
+
             <button
               type="button"
               (click)="borrar(l.id)"
@@ -261,7 +290,7 @@
           </td>
         </tr>
 
-        <tr *ngIf="libros.length > 0 && librosFiltrados.length === 0">
+        <tr *ngIf="!cargando && libros.length > 0 && librosFiltrados.length === 0">
           <td colspan="6" style="text-align:center; padding:12px; font-size:13px; opacity:.7;">
             No hay resultados que coincidan con el filtro.
           </td>

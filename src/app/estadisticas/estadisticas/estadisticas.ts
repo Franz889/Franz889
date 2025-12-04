@@ -16,6 +16,7 @@ export class EstadisticasComponent implements OnInit {
   totalCategorias = 0;
   librosPorCategoria: { categoria: string; cantidad: number }[] = [];
   cargando = true;
+  ahora = new Date();
 
   constructor(private fs: FirestoreService) {}
 
