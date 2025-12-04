@@ -1,59 +1,78 @@
-# BibliotecaVirtual
+Biblioteca Virtual
+Aplicación web desarrollada por el estudiante Fran Marcel Rivera Quintana, con Angular Standalone y Firebase (Firestore + Authentication + Hosting) para gestionar una biblioteca digital.
+Permite a los usuarios autenticarse, registrar libros, organizarlos por categorías, filtrarlos en tiempo real y visualizar estadísticas.
+Tecnologías utilizadas
+> Angular 17 (Standalone Components)
+> Ty
+> Firebase Authentication
+> Firebase Firestore
+> Firebase Hosting
+> RxJS
+> HTML / CSS
+> Angular Animations (opcional)
+Funcionalidades principales:
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.9.
+Autenticación:
+> Registro de usuario.
+> Inicio y cierre de sesión.
+> Protección de rutas con guard.
+> Acceso restringido solo para usuarios autenticados.
 
-## Development server
+Gestión de Categorías (CRUD completo):
+> Crear categorías.
+> Editar categorías.
+> Eliminar categorías.
+> Búsqueda en tiempo real.
+> Validaciones reactivas.
 
-To start a local development server, run:
+Gestión de Libros (CRUD completo):
+> Agregar, editar y eliminar libros.
+> Cada libro pertenece a una categoría.
+> Cada libro se guarda bajo el usuario autenticado (multicuenta funcional).
+> Filtro por título, autor o categoría.
+> Campo de estado del libro (Disponible / Prestado).
+> Detalle individual de cada libro.
+> Validaciones de formularios reactivos:
 
-```bash
+Estadísticas en tiempo real:
+> Total de libros
+> Total de categorías
+> Conteo de libros por categoría
+> Datos actualizados desde Firestore sin recargar la página
+
+Hosting en Firebase:
+>Aplicación desplegada en producción en Firebase Hosting.
+URL del proyecto desplegado:
+https://biblioteca-virtual-8fd1b.web.app
+
+Estructura principal del proyecto: 
+src/
+ ├── app/
+ │   ├── auth/                # Login / Registro
+ │   ├── libros/              # CRUD de libros
+ │   ├── categorias/          # CRUD de categorías
+ │   ├── estadisticas/        # Vista de estadísticas
+ │   ├── core/
+ │   │    ├── firestore.ts    # Servicios Firestore
+ │   │    ├── auth.ts         # Autenticación Firebase
+ │   │    └── models.ts       # Interfaces
+ │   └── app.routes.ts        # Rutas + Guards
+ ├── assets/
+ └── environments/
+
+Instalación y ejecución:
+1️. Clonar el repositorio
+git clone https://github.com/Franz889/Franz889.git
+cd Franz889
+
+2. Instalar dependencias
+npm install
+
+3️. Ejecutar en modo desarrollo
 ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+4. Abrir en el navegador:
+http://localhost:4200/ (O el puerto que te aparece)
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
+5. Compilar para producción
 ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
