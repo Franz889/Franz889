@@ -94,3 +94,5 @@ Autor:
 Fran Marcel Rivera Quintana - Estudiante de ingeniería de sistemas de la Universidad Nacional José María Arguedas
 Proyecto académico para el curso de Programación Web.
 
+El manual de usuario está disponible en la sección de Releases:
+https://github.com/Franz889/Franz889/releases/tag/v1.0.0
