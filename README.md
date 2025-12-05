@@ -76,3 +76,21 @@ http://localhost:4200/ (O el puerto que te aparece)
 
 5. Compilar para producción
 ng build
+
+Configuración Firebase
+El proyecto utiliza:
+> Authentication (Email/Password)
+>Firestore Database
+>Hosting
+
+Para configurar Firebase:
+firebase init
+firebase deploy
+
+URL de video (11 minutos)
+https://drive.google.com/drive/folders/16ANKBTmUyqlCPZ2ALMwtzKL5WyPxW-Qz?usp=sharing
+
+Autor:
+Fran Marcel Rivera Quintana - Estudiante de ingeniería de sistemas de la Universidad Nacional José María Arguedas
+Proyecto académico para el curso de Programación Web.
+
